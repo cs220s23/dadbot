@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 import sys
 import os
+from asyncio import sleep
+
 import discord
 import dotenv
 
@@ -25,6 +27,21 @@ async def on_ready():
 async def ping(ctx):
     """Responds to ping with pong"""
     await ctx.send("pong")
+
+@bot.command()
+async def timer(ctx, time):
+    """Starts a timer for a set amount of time in seconds, then pings the calling user"""
+    try:
+        time = float(time)
+    except ValueError:
+        await ctx.send("Unrecognized time format")
+        return
+
+    await ctx.send(f'Starting timer for {time} seconds')
+    print(f"Timer Started for {time} by {ctx.author}")
+    await sleep(time)
+    await ctx.send(f'Time\'s up {ctx.author.mention} !')
+    print("Timer finished")
 
 if __name__ == "__main__":
     if DISCORD_TOKEN == None:
