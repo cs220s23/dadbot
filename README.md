@@ -12,6 +12,12 @@ Built using [discord.py](https://github.com/Rapptz/discord.py)
 * [ ] read jokes from database
 * [ ] update documentation
 
+## Redis
+
+* stores jokes as set of lists
+* use SRANDMEMBER to randomly select joke
+* 
+
 ## Installation
 
 ### Local
@@ -30,3 +36,6 @@ python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
+
+### Docker Compose
+

@@ -1,0 +1,11 @@
+version: "3.9"
+
+services:
+  dadbot:
+    image: dadbot/latest
+    build: ./discordbot
+    container_name: dadbot
+    env_file:
+      - .env
+  db:
+    image: redis:latest
