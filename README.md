@@ -7,8 +7,9 @@ Built using [discord.py](https://github.com/Rapptz/discord.py)
 
 ## TODO
 
-* [ ] add joke command
-* [ ] read jokes from database/file
+* [x] add joke command
+* [x] read jokes from file
+* [ ] read jokes from database
 * [ ] update documentation
 
 ## Installation
