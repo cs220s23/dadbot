@@ -38,6 +38,7 @@ async def joke(ctx):
         await ctx.send(part)
         await sleep(1)
 
+@bot.command()
 async def timer(ctx, time):
     """Starts a timer for a set amount of time in seconds, then pings the calling user"""
     try:
