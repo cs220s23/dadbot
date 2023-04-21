@@ -12,6 +12,8 @@ from jokes import *
 
 dotenv.load_dotenv()
 DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
+REDIS_HOST = os.getenv('REDIS_HOST')
+REDIS_PORT = os.getenv('REDIS_PORT')
 
 
 intents = discord.Intents.default()
@@ -19,17 +21,20 @@ intents.message_content = True
 
 bot = commands.Bot(command_prefix='!', intents=intents)
 
-jokes = Jokes("jokes.txt")
+# jokes = FileJokes("jokes.txt")
+jokes = RedisJokes(REDIS_HOST, int(REDIS_PORT))
 
 @bot.event
 async def on_ready():
         print(f'{bot.user} is online')
+        print(f'Using {jokes.__class__} as joke source')
         print('#############')
 
 @bot.command()
 async def ping(ctx):
     """Responds to ping with pong"""
     await ctx.send("pong")
+    print(f"{ctx.author} pinged")
 
 @bot.command()
 async def joke(ctx):
