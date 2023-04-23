@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import io
 import sys
 import os
 from asyncio import sleep
@@ -6,8 +7,11 @@ from asyncio import sleep
 import discord
 import dotenv
 
+from PIL import Image
+
 from discord.ext import commands
 from jokes import *
+import memes
 
 
 dotenv.load_dotenv()
@@ -57,6 +61,17 @@ async def timer(ctx, time):
     await sleep(time)
     await ctx.send(f'Time\'s up {ctx.author.mention} !')
     print("Timer finished")
+
+@bot.command()
+async def winning(ctx, *message):
+    """Pastes the users avatar on top of a meme"""
+    meme_file = "/tmp/winning.png"
+    data = io.BytesIO(await ctx.author.avatar.read())
+    img = Image.open(data)
+    memes.winning(img, ' '.join(message)).save(meme_file, format="png")
+    await ctx.send('test: ', file=discord.File(meme_file))
+    os.remove(meme_file)
+
 
 if __name__ == "__main__":
     if DISCORD_TOKEN == None:
