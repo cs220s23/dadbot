@@ -70,7 +70,7 @@ async def winning(ctx, *message):
     data = io.BytesIO(await ctx.author.avatar.read())
     img = Image.open(data)
     memes.winning(img, message, name=ctx.author.name).save(meme_file, format="png")
-    await ctx.send('test: ', file=discord.File(meme_file))
+    await ctx.send(file=discord.File(meme_file))
     os.remove(meme_file)
 
 

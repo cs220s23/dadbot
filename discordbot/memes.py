@@ -2,6 +2,8 @@ from PIL import Image, ImageDraw, ImageFont
 
 import requests
 import textwrap
+import os
+
 
 templates = {
     "winning": "pic/are_ya_winning.png"
