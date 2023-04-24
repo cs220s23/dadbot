@@ -65,11 +65,12 @@ async def timer(ctx, time):
 @bot.command()
 async def winning(ctx, *message):
     """Pastes the users avatar on top of a meme"""
-    meme_file = "/tmp/winning.png"
+    message = ' '.join(message)
+    meme_file = f"/tmp/{ctx.author.name}_winning.png"
     data = io.BytesIO(await ctx.author.avatar.read())
     img = Image.open(data)
-    memes.winning(img, ' '.join(message)).save(meme_file, format="png")
-    await ctx.send('test: ', file=discord.File(meme_file))
+    memes.winning(img, message, name=ctx.author.name).save(meme_file, format="png")
+    await ctx.send(file=discord.File(meme_file))
     os.remove(meme_file)
 
 
