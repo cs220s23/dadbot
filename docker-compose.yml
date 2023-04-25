@@ -1,0 +1,13 @@
+version: "3.9"
+
+services:
+  dadbot:
+    build: ./discordbot
+    container_name: dadbot
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    env_file:
+      - .env
+  redis:
+    image: redis:latest

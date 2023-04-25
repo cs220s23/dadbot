@@ -1,2 +1,5 @@
 python-dotenv
 discord.py
+redis
+Pillow
+requests
