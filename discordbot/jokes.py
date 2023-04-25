@@ -12,6 +12,9 @@ class Jokes(ABC):
         for joke_part in self.get_joke():
             yield joke_part
 
+    def source(self) -> str:
+        return type(self).__name__
+
 
 class FileJokes(Jokes):
     def __init__(self, joke_src: str):
@@ -39,5 +42,8 @@ class RedisJokes(Jokes):
         joke_id = self.r.srandmember("jokes")
         print(f'joke_id={joke_id}')
         if joke_id is None:
-            return ("No jokes stored in Database","Please add jokes")
+            return "No jokes stored in Database","Please add jokes"
         return tuple(self.r.lrange(f"jokes:{joke_id}", 0, -1))
+
+    def __del__(self):
+        self.r.close()

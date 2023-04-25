@@ -10,9 +10,12 @@ import dotenv
 from PIL import Image
 
 from discord.ext import commands
+from redis import ConnectionError
 from jokes import *
+import logging
 import memes
 
+logger = logging.getLogger('discord')
 
 dotenv.load_dotenv()
 DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
@@ -25,20 +28,24 @@ intents.message_content = True
 
 bot = commands.Bot(command_prefix='!', intents=intents)
 
-# jokes = FileJokes("jokes.txt")
-jokes = RedisJokes(REDIS_HOST, int(REDIS_PORT))
+try:
+    logger.info("Connecting to redis")
+    jokes = RedisJokes(REDIS_HOST, int(REDIS_PORT))
+    jokes.r.ping()
+except ConnectionError:
+    logger.warning('Cannot connect to redis, defaulting to "jokes.txt"')
+    jokes = FileJokes("jokes.txt")
 
 @bot.event
 async def on_ready():
-        print(f'{bot.user} is online')
-        print(f'Using {jokes.__class__} as joke source')
-        print('#############')
+    logger.info(f'{bot.user} is online')
+    logger.info(f'Using {jokes.source()} as joke source')
 
 @bot.command()
 async def ping(ctx):
     """Responds to ping with pong"""
     await ctx.send("pong")
-    print(f"{ctx.author} pinged")
+    logger.info(f"{ctx.author} pinged")
 
 @bot.command()
 async def joke(ctx):
@@ -54,13 +61,13 @@ async def timer(ctx, time):
         time = float(time)
     except ValueError:
         await ctx.send("Unrecognized time format")
-        return
-
-    await ctx.send(f'Starting timer for {time} seconds')
-    print(f"Timer Started for {time} by {ctx.author}")
-    await sleep(time)
-    await ctx.send(f'Time\'s up {ctx.author.mention} !')
-    print("Timer finished")
+        logger.error(f"Unrecognized time format {time}")
+    else:
+        await ctx.send(f'Starting timer for {time} seconds')
+        logger.info(f"Timer Started for {time} by {ctx.author}")
+        await sleep(time)
+        await ctx.send(f'Time\'s up {ctx.author.mention} !')
+        logger.info(f"Timer started by {ctx.author} ended after {time} seconds")
 
 @bot.command()
 async def winning(ctx, *message):
@@ -70,12 +77,14 @@ async def winning(ctx, *message):
     data = io.BytesIO(await ctx.author.avatar.read())
     img = Image.open(data)
     memes.winning(img, message, name=ctx.author.name).save(meme_file, format="png")
+    logger.info(f'Saving {meme_file} for {ctx.author}')
     await ctx.send(file=discord.File(meme_file))
     os.remove(meme_file)
+    logger.info(f'Removing {meme_file}')
 
 
 if __name__ == "__main__":
-    if DISCORD_TOKEN == None:
+    if DISCORD_TOKEN is None or DISCORD_TOKEN == '':
         sys.exit("Missing token")
 
     bot.run(DISCORD_TOKEN)
