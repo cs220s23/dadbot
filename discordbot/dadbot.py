@@ -11,6 +11,7 @@ from PIL import Image
 
 from discord.ext import commands
 from redis import ConnectionError
+
 from jokes import *
 import logging
 import memes
@@ -21,25 +22,33 @@ dotenv.load_dotenv()
 DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
 REDIS_HOST = os.getenv('REDIS_HOST')
 REDIS_PORT = os.getenv('REDIS_PORT')
+JOKE_FILE = os.getenv('JOKE_FILE')
 
 
 intents = discord.Intents.default()
 intents.message_content = True
 
 bot = commands.Bot(command_prefix='!', intents=intents)
-
-try:
-    logger.info("Connecting to redis")
-    jokes = RedisJokes(REDIS_HOST, int(REDIS_PORT))
-    jokes.r.ping()
-except ConnectionError:
-    logger.warning('Cannot connect to redis, defaulting to "jokes.txt"')
-    jokes = FileJokes("jokes.txt")
+bot.jokes = None
 
 @bot.event
 async def on_ready():
     logger.info(f'{bot.user} is online')
-    logger.info(f'Using {jokes.source()} as joke source')
+    logger.info(f'Attempting to establish redis connection')
+    try:
+        bot.jokes = RedisJokes(REDIS_HOST, int(REDIS_PORT))
+        bot.jokes.r.ping()
+        logger.info(f'Connection to {REDIS_HOST}:{REDIS_PORT} successful')
+        if JOKE_FILE is None:
+            logger.warning(f'Default joke source not set, defaulting to "jokes.txt"')
+            joke_file = 'jokes.txt'
+        else:
+            joke_file = JOKE_FILE
+        bot.jokes.read_from_file(joke_file)
+    except ConnectionError:
+        logger.warning('Cannot connect to redis, defaulting to "bot.jokes.txt"')
+        bot.jokes = FileJokes("jokes.txt")
+    logger.info(f'Using {bot.jokes.source()} as joke source')
 
 @bot.command()
 async def ping(ctx):
@@ -50,7 +59,7 @@ async def ping(ctx):
 @bot.command()
 async def joke(ctx):
     """Tells jokes from a file"""
-    for part in jokes.tell_joke():
+    for part in bot.jokes.tell_joke():
         await ctx.send(part)
         await sleep(1)
 
