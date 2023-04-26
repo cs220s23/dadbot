@@ -9,6 +9,9 @@ class Jokes(ABC):
     def get_joke(self) -> tuple:
         pass
 
+    def add_joke(self, jokes: Sequence[str]):
+        pass
+
     def tell_joke(self) -> str:
         for joke_part in self.get_joke():
             yield joke_part

@@ -58,10 +58,20 @@ async def ping(ctx):
 
 @bot.command()
 async def joke(ctx):
-    """Tells jokes from a file"""
+    """Tells jokes"""
     for part in bot.jokes.tell_joke():
         await ctx.send(part)
         await sleep(1)
+
+@bot.command()
+async def jokeadd(ctx, *joke):
+    """Adds a joke to the joke store"""
+    if bot.jokes.source() == "RedisJokes":
+        joke_parts = tuple( j.strip() for j in ' '.join(joke).split('|'))
+        bot.jokes.add_joke(joke_parts)
+        logger.info(f'{ctx.author} added joke {bot.jokes.r.scard("jokes")} to the joke database')
+    else:
+        await ctx.send(f"Reading Jokes from {bot.jokes.source()}, cannot add jokes to that source")
 
 @bot.command()
 async def timer(ctx, time):
